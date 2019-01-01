@@ -194,12 +194,12 @@ def save_predictions(predictions, output_filename, users_filename):
 def main():
   start_date = '2018-12-27'
 
-  users_filename = 'users.data'
-  items_filename = 'items.data'
-  ratings_filename = 'ratings.data'
+  users_filename = 'output/users.data'
+  items_filename = 'output/items.data'
+  ratings_filename = 'output/ratings.data'
 
-  user_based_predictions_filename = 'user_based_predictions.txt'
-  item_based_predictions_filename = 'item_based_predictions.txt'
+  user_based_predictions_filename = 'output/user_based_predictions.txt'
+  item_based_predictions_filename = 'output/item_based_predictions.txt'
 
   analytics = initialize_analyticsreporting()
   response = get_report(analytics, start_date)
