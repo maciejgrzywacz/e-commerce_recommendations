@@ -177,6 +177,20 @@ def best_predictions(prediction, k = 5):
 
   return best_predictions
 
+def most_popular_products(ratings_filename, k = 10):
+  r_cols = ['user_id', 'item_id', 'rating']
+  ratings = pd.read_csv(ratings_filename, sep=',', names=r_cols,encoding='utf-8')
+ 
+  sum_by_items = ratings.groupby('item_id', as_index=False).agg('sum')
+
+  k_largest_ratings = sum_by_items.nlargest(k, 'rating')
+
+  return k_largest_ratings['item_id'].tolist()	
+
+  
+def save_most_popular(most_popular_filename, most_popular_array): 
+  with open(most_popular_filename, 'w') as output:
+    output.write(''.join(str(i) + ' ' for i in most_popular_array)) 
 
 def save_predictions(predictions, output_filename, users_filename):
 
@@ -186,7 +200,6 @@ def save_predictions(predictions, output_filename, users_filename):
     users_id_counter = 0
 
     for row in predictions:
-      print(row)
       output.write(users[users_id_counter][1] + ': ' + ''.join(str(e) + ' ' for e in row) + '\n')
       users_id_counter = users_id_counter + 1
 
@@ -200,6 +213,7 @@ def main():
 
   user_based_predictions_filename = 'output/user_based_predictions.txt'
   item_based_predictions_filename = 'output/item_based_predictions.txt'
+  most_popular_products_filename = 'output/most_popular.txt'
 
   analytics = initialize_analyticsreporting()
   response = get_report(analytics, start_date)
@@ -210,12 +224,11 @@ def main():
   best_user_predictions = best_predictions(user_based_predictions)
   best_item_predictions = best_predictions(item_based_predictions)
   
-  print(best_user_predictions)
-  print(best_item_predictions)
-
+  most_popular_products_array = most_popular_products(ratings_filename)
+  
   save_predictions(best_user_predictions, user_based_predictions_filename, users_filename)
   save_predictions(best_item_predictions, item_based_predictions_filename, users_filename)
-
+  save_most_popular(most_popular_products_filename, most_popular_products_array)
 
 if __name__ == '__main__':
   main()
