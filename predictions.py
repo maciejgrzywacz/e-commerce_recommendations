@@ -65,6 +65,28 @@ def print_response(response):
         for metricHeader, value in zip(metricHeaders, values.get('values')):
           print(metricHeader.get('name') + ': ' + value)
 
+def print_response(response):
+  """Parses and prints the Analytics Reporting API V4 response.
+  Args: 
+	response: An Analytics Reporting API V4 response.
+  """
+
+  for report in response.get('reports', []):
+    columnHeader = report.get('columnHeader', {})
+    dimensionHeaders = columnHeader.get('dimensions', [])
+    metricHeaders = columnHeader.get('metricHeader', {}).get('metricHeaderEntries', [])
+
+    for row in report.get('data', {}).get('rows', []):
+      dimensions = row.get('dimensions', [])
+      dateRangeValues = row.get('metrics', [])
+
+      for header, dimension in zip(dimensionHeaders, dimensions):
+        print(header + ': ' + dimension)
+
+      for i, values in enumerate(dateRangeValues):
+        print('Date range: ' + str(i))
+        for metricHeader, value in zip(metricHeaders, values.get('values')):
+          print(metricHeader.get('name') + ': ' + value)
 
 
 def save_response(response, users_filename, items_filename, ratings_filename):
@@ -134,16 +156,22 @@ def create_predictions(ratings_filename):
   r_cols = ['user_id', 'item_id', 'rating']
   ratings = pd.read_csv(ratings_filename, sep=',', names=r_cols,encoding='latin-1')
   
+  print(ratings.sort_values('user_id'))  
+  
   # Number of unique users and items
   n_users = ratings.user_id.unique().shape[0]
   n_items = max(ratings.item_id)
 
   # Build user-item matrix
+  
   data_matrix = np.zeros((n_users, n_items))
   for line in ratings.itertuples():
-    data_matrix[line[1]-1, line[2]-1] = line[3]
+    data_matrix[line[1], line[2] - 1] = line[3]
 	
-  normalize(data_matrix)
+	
+  print(data_matrix[2])
+  data_matrix = normalize(data_matrix)
+  print(data_matrix[2])
 
   # Calculate user and item similarities
   user_similarity = pairwise_distances(data_matrix, metric = 'cosine')
@@ -220,7 +248,11 @@ def main():
 
   analytics = initialize_analyticsreporting()
   response = get_report(analytics, start_date)
+   
+  
   save_response(response, users_filename, items_filename, ratings_filename)
+  
+  
 
   user_based_predictions, item_based_predictions = create_predictions(ratings_filename)
 
