@@ -3,6 +3,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 import pandas as pd
 import numpy as np
 from sklearn.metrics.pairwise import pairwise_distances
+from sklearn.preprocessing import normalize
 import csv
 
 SCOPES = ['https://www.googleapis.com/auth/analytics.readonly']
@@ -141,6 +142,8 @@ def create_predictions(ratings_filename):
   data_matrix = np.zeros((n_users, n_items))
   for line in ratings.itertuples():
     data_matrix[line[1]-1, line[2]-1] = line[3]
+	
+  normalize(data_matrix)
 
   # Calculate user and item similarities
   user_similarity = pairwise_distances(data_matrix, metric = 'cosine')
